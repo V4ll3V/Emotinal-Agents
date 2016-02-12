@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2015
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmotionalAgents.CSharp.Plugins", "EmotionalAgents.CSharp.Plugins.csproj", "{BD560599-EC95-26FE-B464-576EC4F0AA9E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmotionalAgents.CSharp", "EmotionalAgents.CSharp.csproj", "{DBE1A848-DB85-1D86-A39A-7CEC03C3ED97}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EmotionalAgents.CSharp.Editor", "EmotionalAgents.CSharp.Editor.csproj", "{2BE1B581-F741-B63F-D461-4C7C81391C7C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BD560599-EC95-26FE-B464-576EC4F0AA9E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD560599-EC95-26FE-B464-576EC4F0AA9E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD560599-EC95-26FE-B464-576EC4F0AA9E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD560599-EC95-26FE-B464-576EC4F0AA9E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBE1A848-DB85-1D86-A39A-7CEC03C3ED97}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBE1A848-DB85-1D86-A39A-7CEC03C3ED97}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBE1A848-DB85-1D86-A39A-7CEC03C3ED97}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBE1A848-DB85-1D86-A39A-7CEC03C3ED97}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2BE1B581-F741-B63F-D461-4C7C81391C7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2BE1B581-F741-B63F-D461-4C7C81391C7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2BE1B581-F741-B63F-D461-4C7C81391C7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2BE1B581-F741-B63F-D461-4C7C81391C7C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
