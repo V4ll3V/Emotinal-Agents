@@ -5,6 +5,8 @@ using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityStandardAssets.Characters.ThirdPerson;
+using MessageBus;
+using Assets.Scripts.Emotions;
 
 namespace Assets.Scripts.Agents
 {
@@ -38,15 +40,18 @@ namespace Assets.Scripts.Agents
         {
             if (agent.path.status == NavMeshPathStatus.PathInvalid || agent.path.status == NavMeshPathStatus.PathPartial)
             {
-                Debug.Log("GOAL NOT REACHABLE");
+                GlobalMessageBus.Instance.PublishEvent(new GoalNotReachableEvent(Agent));
                 agent.Stop();
+                target = null;
                 agent.ResetPath();
             }
             else if (agent.hasPath && agent.remainingDistance <= agent.stoppingDistance)
             {
-                Debug.Log("GOAL REACHED");
+                GlobalMessageBus.Instance.PublishEvent(new GoalReachedEvent(Agent));
                 agent.Stop();
+                target = null;
                 agent.ResetPath();
+                
             }
             else
                 MoveAgent();
@@ -80,7 +85,7 @@ namespace Assets.Scripts.Agents
 
         public void SetTarget(Transform target)
         {
-            this.target = target;
+            this.target = target.transform;
         }
     }
 }

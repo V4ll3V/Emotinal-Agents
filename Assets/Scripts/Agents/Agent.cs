@@ -20,13 +20,25 @@ namespace Assets.Scripts.Agents
         supprised,
         hate,
     }
+
     public class Agent
     {
+        public AgentModule AgentModule;
+
         public List<Emotion> ActiveEmotions;
         public AgentPersonality AgentPersontality;
 
-
         public List<Goal> ActiveGoals;
         public List<GameObject> Attitudes;
+
+        public AgentType AgentType;
+
+        public Agent (AgentModule module, AgentType type)
+        {
+            AgentModule = module;
+            AgentModule.Agent = this;
+            ActiveEmotions = new List<Emotion>();
+            AgentType = type;
+        }
     }
 }

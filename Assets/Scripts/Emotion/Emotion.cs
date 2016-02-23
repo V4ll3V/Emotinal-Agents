@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Assets.Scripts.Emotions
 {
-    public enum PositveEmotionType
+    public enum EmotionType
     {
         joy,
         hope,
@@ -13,9 +13,6 @@ namespace Assets.Scripts.Emotions
         pride,
         gratitude,
         love,
-    }
-    public enum NegativEmotionType
-    {
         distress,
         fear,
         disappointment,
@@ -23,9 +20,18 @@ namespace Assets.Scripts.Emotions
         anger,
         hate
     }
+
     public class Emotion
     {
         public int Intensity;
         public int Duration;
+        public EmotionType EmotionType;
+
+        public Emotion (EmotionType type, int intensity, int duration)
+        {
+            EmotionType = type;
+            Intensity = intensity;
+            Duration = duration;
+        }
     }
 }
