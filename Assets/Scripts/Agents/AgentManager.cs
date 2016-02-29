@@ -35,6 +35,7 @@ namespace Assets.Scripts.Agents
 
         private List<GameObject> _enemyAgents;
         private List<GameObject> _friendlyAgents;
+        private GameObject _lastFriendly;
 
         // Use this for initialization
         void Start()
@@ -44,18 +45,18 @@ namespace Assets.Scripts.Agents
 
             _actorSpawnAreas = new List<Transform>();
             _actorSpawnAreas.AddRange(ActorSpawnArea.GetComponentsInChildren<Transform>());
+            _actorSpawnAreas.Remove(ActorSpawnArea.transform);
 
             _enemySpawnAreas = new List<Transform>();
             _enemySpawnAreas.AddRange(EnemySpawnContainer.GetComponentsInChildren<Transform>());
+            _enemySpawnAreas.Remove(EnemySpawnContainer.transform);
 
             _friendlySpawnAreas = new List<Transform>();
             _friendlySpawnAreas.AddRange(FriendlySpawnContainer.GetComponentsInChildren<Transform>());
+            _friendlySpawnAreas.Remove(FriendlySpawnContainer.transform);
 
             _enemyAgents = new List<GameObject>();
             _friendlyAgents =  new List<GameObject>();
-
-            if (ActorPrefab != null && _actorSpawnAreas != null)
-                InstatiateGameObject(ActorPrefab, AgentType.Actor);
         }
 
         public void OnEvent(NewEmotionCreatedMessage evt)
@@ -140,11 +141,21 @@ namespace Assets.Scripts.Agents
         }
         public void SetActorTragetFriendly()
         {
-            _actorAgent.GetComponent<AgentModule>().SetTarget(_friendlyAgents.FirstOrDefault().transform);
+            _lastFriendly = _friendlyAgents.FirstOrDefault();
+            if (_lastFriendly != null)
+                _actorAgent.GetComponent<AgentModule>().SetTarget(_lastFriendly.transform);
         }
         public void SetActorTargetObject()
         {
             //TODO
+        }
+        public void CreateActor()
+        {
+            if (ActorPrefab != null && _actorSpawnAreas != null && _actorAgent == null)
+            {
+                InstatiateGameObject(ActorPrefab, AgentType.Actor);
+                MainCamera.GetComponent<FollowTarget>().Target = _actorAgent.transform;
+            }
         }
     }
 }

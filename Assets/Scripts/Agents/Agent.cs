@@ -13,7 +13,6 @@ namespace Assets.Scripts.Agents
         happy,
         pride,
         resilent,
-        frightend,
         fearfull,
         angry,
         sad,

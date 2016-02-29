@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using UnityEngine.UI;
+using System;
 
 namespace Assets.Scripts.Agents
 {
@@ -39,6 +40,12 @@ namespace Assets.Scripts.Agents
             else
                 AgentManager.InstatiateGameObject(AgentManager.EnemyPrefab, AgentType.Enemy);
         }
+        public void SetEnemyCount(InputField enemyCount)
+        {
+            int count = 0;
+            if (Int32.TryParse(enemyCount.text, out count))
+              _enemyCount = count;
+        }
 
         public void OnSpawnFriendly()
         {
@@ -53,8 +60,16 @@ namespace Assets.Scripts.Agents
                 _showObstalces = false;
             }
             else
+            {
+                ObstacleContainer.SetActive(_showObstalces);
                 _showObstalces = true;
+            }
             
+        }
+
+        public void OnCreateActor()
+        {
+            AgentManager.CreateActor();
         }
     }
 }

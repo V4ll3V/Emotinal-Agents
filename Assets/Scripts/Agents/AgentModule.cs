@@ -60,7 +60,6 @@ namespace Assets.Scripts.Agents
         {
             if (GoalType == GoalType.ReachTarget)
             {
-                SetTarget(target);
                 MoveTo();
             }
             else
@@ -83,9 +82,10 @@ namespace Assets.Scripts.Agents
             character.Move(Vector3.zero, false, false);
         }
 
-        public void SetTarget(Transform target)
+        public void SetTarget(Transform moveTarget)
         {
-            this.target = target.transform;
+            if(moveTarget != null && target == null)
+                target = moveTarget.transform;
         }
     }
 }

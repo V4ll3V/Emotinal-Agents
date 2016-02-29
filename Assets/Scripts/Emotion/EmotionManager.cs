@@ -27,6 +27,11 @@ namespace Assets.Scripts.Emotions
             CreateEmotion(EmotionType.distress, evt.Agent);
         }
 
+        public void DetermineEmmotion()
+        {
+
+        }
+
         public void CreateEmotion(EmotionType type, Agent agent)
         {
             Emotion emotion = new Emotion(type, DetermineEmotionIntensity(agent), DetermineEmotionDuration(agent));
