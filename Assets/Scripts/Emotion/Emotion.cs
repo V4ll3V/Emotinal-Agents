@@ -13,12 +13,14 @@ namespace Assets.Scripts.Emotions
         pride,
         gratitude,
         love,
-        distress,
+        adminration,
+        dispair,
         fear,
         disappointment,
-        remorse,
+        reproach,
         anger,
-        hate
+        hate,
+        shame
     }
 
     public class Emotion

@@ -7,6 +7,7 @@ namespace Assets.Scripts.Goals
     {
         ReachTarget,
         KillTarget,
+        RunAway,
     }
     public class Goal
     {

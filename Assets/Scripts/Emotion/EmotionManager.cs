@@ -6,10 +6,11 @@ using System.Linq;
 using System.Text;
 using MessageBus;
 using UnityEngine;
+using Assets.Scripts.Events;
 
 namespace Assets.Scripts.Emotions
 {
-    public class EmotionManager : MonoBehaviour, ISubscriber<GoalReachedEvent>, ISubscriber<GoalNotReachableEvent>
+    public class EmotionManager : MonoBehaviour, ISubscriber<NewEventMessage>
     {
         void Start()
         {
@@ -17,19 +18,27 @@ namespace Assets.Scripts.Emotions
 
         }
 
-        public void OnEvent(GoalReachedEvent evt)
+        public void OnEvent(NewEventMessage evt)
         {
-            CreateEmotion(EmotionType.joy, evt.Agent);         
+            DetermineEmmotion(evt.AgentEvent, evt.Agent);      
         }
 
-        public void OnEvent(GoalNotReachableEvent evt)
-        {
-            CreateEmotion(EmotionType.distress, evt.Agent);
-        }
 
-        public void DetermineEmmotion()
+        public void DetermineEmmotion(AgentEvent currentEvent, Agent agent)
         {
+            if(currentEvent.EventType == AgentEventType.ActionsOfAgents)
+            {
+                if (currentEvent.EventIsPositive)
+                    CreateEmotion(EmotionType.joy, agent);
+                else
+                    CreateEmotion(EmotionType.distress, agent);
+            }
+            if (currentEvent.EventType == AgentEventType.AspectsOfObjects)
+            { }
+            if (currentEvent.EventType == AgentEventType.ConsequencesOfEvents)
+            {
 
+            }
         }
 
         public void CreateEmotion(EmotionType type, Agent agent)
@@ -38,13 +47,11 @@ namespace Assets.Scripts.Emotions
             GlobalMessageBus.Instance.PublishEvent(new NewEmotionCreatedMessage(emotion, agent));
         }
         public int DetermineEmotionIntensity(Agent agent)
-        {
-            
-            return 100;
+        {          
+            return 4;
         }
         public int DetermineEmotionDuration(Agent agent)
         {
-
             return 100;
         }
 

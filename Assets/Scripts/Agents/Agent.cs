@@ -20,24 +20,38 @@ namespace Assets.Scripts.Agents
         hate,
     }
 
+    public enum ActiveEmotionPair
+    {
+        JoyDispair,
+        FearHope,
+        ShamePride,
+        DisappointmentRelief,
+        AngerGratitude,
+        ReporachAdmiration,
+        LoveHate,
+    }
+
     public class Agent
     {
         public AgentModule AgentModule;
 
         public List<Emotion> ActiveEmotions;
+        public Dictionary<ActiveEmotionPair, float> ActiveEmotionPairs;
         public AgentPersonality AgentPersontality;
 
         public List<Goal> ActiveGoals;
         public List<GameObject> Attitudes;
+        public int HP;
 
         public AgentType AgentType;
 
-        public Agent (AgentModule module, AgentType type)
+        public Agent (AgentModule module, AgentType type, int hp)
         {
             AgentModule = module;
             AgentModule.Agent = this;
             ActiveEmotions = new List<Emotion>();
             AgentType = type;
+            HP = hp;
         }
     }
 }

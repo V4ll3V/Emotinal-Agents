@@ -11,6 +11,15 @@ namespace Assets.Scripts.Agents
         public AgentManager AgentManager;
         public GameObject ObstacleContainer;
 
+        public Scrollbar JoyDispair;
+        public Scrollbar FearHope;
+        public Scrollbar ShamePride;
+        public Scrollbar DisappointmentRelief;
+        public Scrollbar AngerGratitude;
+        public Scrollbar ReporachAdmiration;
+        public Scrollbar LoveHate;
+
+
         private int _enemyCount;
         private int _timerCount;
         private bool _showObstalces;

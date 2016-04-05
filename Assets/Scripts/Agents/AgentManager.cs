@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Assets.Scripts.Emotions;
 using System.Linq;
 using MessageBus;
+using System;
 
 namespace Assets.Scripts.Agents
 {
@@ -13,7 +14,7 @@ namespace Assets.Scripts.Agents
         Friendly,
         Enemy
     }
-    public class AgentManager : MonoBehaviour, ISubscriber<NewEmotionCreatedMessage>
+    public class AgentManager : MonoBehaviour, ISubscriber<NewEmotionCreatedMessage>, ISubscriber<HpBarChangedMessage>
     {
 
         public GameObject ActorPrefab;
@@ -26,6 +27,7 @@ namespace Assets.Scripts.Agents
         public Camera MainCamera;
 
         private GameObject _actorAgent;
+        public GameObject ActorAgent { get { return _actorAgent;} set { } }
 
         private List<Agent> _activeAgents;
 
@@ -36,6 +38,8 @@ namespace Assets.Scripts.Agents
         private List<GameObject> _enemyAgents;
         private List<GameObject> _friendlyAgents;
         private GameObject _lastFriendly;
+
+        private Dictionary<EmotionType, ActiveEmotionPair> _emotiontypeToEmotionPair;
 
         // Use this for initialization
         void Start()
@@ -57,35 +61,44 @@ namespace Assets.Scripts.Agents
 
             _enemyAgents = new List<GameObject>();
             _friendlyAgents =  new List<GameObject>();
+
+            SetEmotionTypeToEmotionPair();
         }
 
         public void OnEvent(NewEmotionCreatedMessage evt)
         {
             AssignEmotionToAgent(evt.Agent, evt.Emotion);
         }
+        public void OnEvent(HpBarChangedMessage evt)
+        {
+            ReduceAgentHp(evt.Agent, evt.WorldAgent, evt.HpValue);
+        }
 
         public void InstatiateGameObject(GameObject go, AgentType type)
         {
-            GameObject actorInstance = Instantiate(go);
+            GameObject agentInstance = Instantiate(go);
             Transform spawnArea = GetRandomSpawnAreaForType(type);
 
-            actorInstance.transform.SetParent(this.transform);
-            actorInstance.transform.localPosition = spawnArea.transform.localPosition + GetRandomVectorLocation();
-            MainCamera.transform.SetParent(actorInstance.transform);
+            agentInstance.transform.SetParent(this.transform);
+            agentInstance.transform.localPosition = spawnArea.transform.localPosition + GetRandomVectorLocation();
 
-            Agent newAgent = new Agent(actorInstance.GetComponent<AgentModule>(), type);
+            int hp = (type == AgentType.Actor) ? 10 : 2;
+            Agent newAgent = new Agent(agentInstance.GetComponent<AgentModule>(), type, hp);
             _activeAgents.Add(newAgent);
+
+            GlobalMessageBus.Instance.PublishEvent(new ShowHpBarMessage(newAgent));
 
             switch (type)
             {
                 case AgentType.Actor:
-                    _actorAgent = actorInstance;
+                    _actorAgent = agentInstance;
+                    MainCamera.transform.SetParent(agentInstance.transform);
                     break;
                 case AgentType.Friendly:
-                    _friendlyAgents.Add(actorInstance);
+                    _friendlyAgents.Add(agentInstance);
                     break;
                 case AgentType.Enemy:
-                    _enemyAgents.Add(actorInstance);
+                    _enemyAgents.Add(agentInstance);
                     break;
             }
         }
@@ -130,6 +143,30 @@ namespace Assets.Scripts.Agents
             ExpressEmotion(agent, emotion);
         }
 
+        public void DetermineEmotionState(Agent agent)
+        {
+            foreach (EmotionType emotion in Enum.GetValues(typeof(EmotionType)))
+            {
+                IEnumerable<Emotion> emotions = agent.ActiveEmotions.Where(e => e.EmotionType == emotion);
+                float EmotionTypeIntensity = DetermineEmotionTypeIntensity(emotions);
+                ActiveEmotionPair pair = _emotiontypeToEmotionPair[emotion];
+                agent.ActiveEmotionPairs[pair] = EmotionTypeIntensity;
+            }
+        }
+
+        public float DetermineEmotionTypeIntensity(IEnumerable<Emotion> emotions)
+        {
+            float intensity = 0;
+
+            foreach (Emotion em in emotions)
+            {
+                intensity = intensity + (em.Intensity ^ 2);
+            }
+
+            intensity = Mathf.Log(intensity, 2.0f);
+            return intensity;
+        }
+
         public void ExpressEmotion(Agent agent, Emotion emotion)
         {
             GlobalMessageBus.Instance.PublishEvent(new ShowPinMessage(agent.AgentModule.agent, emotion.EmotionType));
@@ -156,6 +193,49 @@ namespace Assets.Scripts.Agents
                 InstatiateGameObject(ActorPrefab, AgentType.Actor);
                 MainCamera.GetComponent<FollowTarget>().Target = _actorAgent.transform;
             }
+        }
+        public void DestroyAgent(GameObject worldAgent, Agent deadAgent)
+        {
+            _activeAgents.Remove(deadAgent);
+
+            switch (deadAgent.AgentType)
+            {
+                case AgentType.Friendly:
+                    _friendlyAgents.Remove(worldAgent);
+                    break;
+                case AgentType.Enemy:
+                    _enemyAgents.Remove(worldAgent);
+                    break;
+            }
+            if(deadAgent.AgentType != AgentType.Actor)
+                Destroy(worldAgent);
+        }
+        public void ReduceAgentHp(Agent agent, GameObject worldAgent, int hpDistraction)
+        {
+            agent.HP -= hpDistraction;
+            Debug.Log(agent.HP);
+            if (agent.AgentType != AgentType.Actor && agent.HP <= 0)
+            {
+                DestroyAgent(worldAgent, agent);
+                GlobalMessageBus.Instance.PublishEvent(new DestroyHpBarMessage(agent));
+            }
+        }
+        public void SetEmotionTypeToEmotionPair()
+        {
+            _emotiontypeToEmotionPair.Add(EmotionType.adminration, ActiveEmotionPair.ReporachAdmiration);
+            _emotiontypeToEmotionPair.Add(EmotionType.anger, ActiveEmotionPair.AngerGratitude);
+            _emotiontypeToEmotionPair.Add(EmotionType.disappointment, ActiveEmotionPair.DisappointmentRelief);
+            _emotiontypeToEmotionPair.Add(EmotionType.dispair, ActiveEmotionPair.JoyDispair);
+            _emotiontypeToEmotionPair.Add(EmotionType.fear, ActiveEmotionPair.FearHope);
+            _emotiontypeToEmotionPair.Add(EmotionType.gratitude, ActiveEmotionPair.AngerGratitude);
+            _emotiontypeToEmotionPair.Add(EmotionType.hate, ActiveEmotionPair.LoveHate);
+            _emotiontypeToEmotionPair.Add(EmotionType.hope, ActiveEmotionPair.FearHope);
+            _emotiontypeToEmotionPair.Add(EmotionType.joy, ActiveEmotionPair.JoyDispair);
+            _emotiontypeToEmotionPair.Add(EmotionType.love, ActiveEmotionPair.LoveHate);
+            _emotiontypeToEmotionPair.Add(EmotionType.pride, ActiveEmotionPair.ShamePride);
+            _emotiontypeToEmotionPair.Add(EmotionType.relief, ActiveEmotionPair.DisappointmentRelief);
+            _emotiontypeToEmotionPair.Add(EmotionType.reproach, ActiveEmotionPair.ReporachAdmiration);
+            _emotiontypeToEmotionPair.Add(EmotionType.shame, ActiveEmotionPair.ShamePride);
         }
     }
 }
