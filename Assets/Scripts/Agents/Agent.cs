@@ -42,6 +42,7 @@ namespace Assets.Scripts.Agents
         public List<Goal> ActiveGoals;
         public List<GameObject> Attitudes;
         public int HP;
+        public EmotionState EmotionState;
 
         public AgentType AgentType;
 
@@ -50,8 +51,10 @@ namespace Assets.Scripts.Agents
             AgentModule = module;
             AgentModule.Agent = this;
             ActiveEmotions = new List<Emotion>();
+            ActiveEmotionPairs = new Dictionary<ActiveEmotionPair, float>();
             AgentType = type;
             HP = hp;
+            EmotionState = EmotionState.resilent;
         }
     }
 }

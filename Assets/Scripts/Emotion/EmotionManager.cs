@@ -7,6 +7,7 @@ using System.Text;
 using MessageBus;
 using UnityEngine;
 using Assets.Scripts.Events;
+using System.Collections;
 
 namespace Assets.Scripts.Emotions
 {
@@ -31,7 +32,12 @@ namespace Assets.Scripts.Emotions
                 if (currentEvent.EventIsPositive)
                     CreateEmotion(EmotionType.joy, agent);
                 else
-                    CreateEmotion(EmotionType.distress, agent);
+                {
+                    if (agent.AgentPersontality.Neuroticism < 5)
+                        CreateEmotion(EmotionType.dispair, agent);
+                    else if (agent.AgentPersontality.Extraversion > 5)
+                        CreateEmotion(EmotionType.anger, agent);
+                }
             }
             if (currentEvent.EventType == AgentEventType.AspectsOfObjects)
             { }
@@ -48,12 +54,11 @@ namespace Assets.Scripts.Emotions
         }
         public int DetermineEmotionIntensity(Agent agent)
         {          
-            return 4;
+            return 10;
         }
         public int DetermineEmotionDuration(Agent agent)
         {
-            return 100;
+            return 10;
         }
-
     }
 }

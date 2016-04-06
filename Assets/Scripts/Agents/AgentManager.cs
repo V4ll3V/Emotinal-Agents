@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Assets.Scripts.Emotions;
 using System.Linq;
 using MessageBus;
-using System;
 
 namespace Assets.Scripts.Agents
 {
@@ -40,6 +39,7 @@ namespace Assets.Scripts.Agents
         private GameObject _lastFriendly;
 
         private Dictionary<EmotionType, ActiveEmotionPair> _emotiontypeToEmotionPair;
+        private Dictionary<EmotionType, EmotionState> _emotionTypeToState;
 
         // Use this for initialization
         void Start()
@@ -63,6 +63,8 @@ namespace Assets.Scripts.Agents
             _friendlyAgents =  new List<GameObject>();
 
             SetEmotionTypeToEmotionPair();
+            SetEmotionTypeToState();
+            InvokeRepeating("EmotionDecay", 1, 1.0f);
         }
 
         public void OnEvent(NewEmotionCreatedMessage evt)
@@ -105,7 +107,7 @@ namespace Assets.Scripts.Agents
 
         private Vector3 GetRandomVectorLocation()
         {
-            return new Vector3(Random.Range(0, 2.5f), 0, Random.Range(0, 2.5f));
+            return new Vector3(Random.Range(0f, 2.5f), 0, Random.Range(0f, 2.5f));
         }
 
         private Transform GetRandomSpawnAreaForType(AgentType type)
@@ -140,18 +142,40 @@ namespace Assets.Scripts.Agents
             int strongestEmotionIntensity = agent.ActiveEmotions.Max(e => e.Intensity);
             Emotion strongestEmotion = agent.ActiveEmotions.FirstOrDefault(e => e.Intensity == strongestEmotionIntensity);
 
+            DetermineEmotionState(agent);
+
             ExpressEmotion(agent, emotion);
         }
 
         public void DetermineEmotionState(Agent agent)
         {
-            foreach (EmotionType emotion in Enum.GetValues(typeof(EmotionType)))
+            if (agent.ActiveEmotionPairs != null)
+            {
+                foreach (ActiveEmotionPair pair in agent.ActiveEmotionPairs.Keys.ToList())
+                {
+                    agent.ActiveEmotionPairs[pair] = 0.0f;
+                }
+            }
+            foreach (EmotionType emotion in System.Enum.GetValues(typeof(EmotionType)))
             {
                 IEnumerable<Emotion> emotions = agent.ActiveEmotions.Where(e => e.EmotionType == emotion);
                 float EmotionTypeIntensity = DetermineEmotionTypeIntensity(emotions);
+                if (EmotionTypeIntensity > 5)
+                    agent.EmotionState = _emotionTypeToState[emotion];
+                Emotion em = emotions.FirstOrDefault();
+                if (em != null &&em.IsPositiveEmotion)
+                    EmotionTypeIntensity *= 1;
+                else if(em != null)
+                    EmotionTypeIntensity *= -1;
+
                 ActiveEmotionPair pair = _emotiontypeToEmotionPair[emotion];
-                agent.ActiveEmotionPairs[pair] = EmotionTypeIntensity;
+                float lastIntensity;
+                if ( agent.ActiveEmotionPairs.TryGetValue(pair, out lastIntensity))
+                    agent.ActiveEmotionPairs[pair] = EmotionTypeIntensity + lastIntensity;
+                else
+                    agent.ActiveEmotionPairs[pair] = EmotionTypeIntensity;
             }
+
         }
 
         public float DetermineEmotionTypeIntensity(IEnumerable<Emotion> emotions)
@@ -160,10 +184,12 @@ namespace Assets.Scripts.Agents
 
             foreach (Emotion em in emotions)
             {
-                intensity = intensity + (em.Intensity ^ 2);
+                if(em.Duration > 0)
+                    intensity = intensity + (em.Intensity ^ 2);
             }
-
-            intensity = Mathf.Log(intensity, 2.0f);
+            if(intensity >0)
+                intensity = Mathf.Log(intensity, 2.0f);
+            
             return intensity;
         }
 
@@ -186,11 +212,13 @@ namespace Assets.Scripts.Agents
         {
             //TODO
         }
-        public void CreateActor()
+        public void CreateActor(AgentPersonality personality)
         {
             if (ActorPrefab != null && _actorSpawnAreas != null && _actorAgent == null)
             {
                 InstatiateGameObject(ActorPrefab, AgentType.Actor);
+                _activeAgents.FirstOrDefault(e => e.AgentType == AgentType.Actor).AgentPersontality = personality;
+
                 MainCamera.GetComponent<FollowTarget>().Target = _actorAgent.transform;
             }
         }
@@ -222,6 +250,7 @@ namespace Assets.Scripts.Agents
         }
         public void SetEmotionTypeToEmotionPair()
         {
+            _emotiontypeToEmotionPair = new Dictionary<EmotionType, ActiveEmotionPair>();
             _emotiontypeToEmotionPair.Add(EmotionType.adminration, ActiveEmotionPair.ReporachAdmiration);
             _emotiontypeToEmotionPair.Add(EmotionType.anger, ActiveEmotionPair.AngerGratitude);
             _emotiontypeToEmotionPair.Add(EmotionType.disappointment, ActiveEmotionPair.DisappointmentRelief);
@@ -236,6 +265,33 @@ namespace Assets.Scripts.Agents
             _emotiontypeToEmotionPair.Add(EmotionType.relief, ActiveEmotionPair.DisappointmentRelief);
             _emotiontypeToEmotionPair.Add(EmotionType.reproach, ActiveEmotionPair.ReporachAdmiration);
             _emotiontypeToEmotionPair.Add(EmotionType.shame, ActiveEmotionPair.ShamePride);
+        }
+        public void SetEmotionTypeToState()
+        {
+            _emotionTypeToState = new Dictionary<EmotionType, EmotionState>();
+            _emotionTypeToState.Add(EmotionType.joy, EmotionState.happy);
+            _emotionTypeToState.Add(EmotionType.anger, EmotionState.angry);
+            _emotionTypeToState.Add(EmotionType.dispair, EmotionState.fearfull);
+        }
+
+        public Agent GetActorAgent()
+        {
+            if (_activeAgents != null)
+                return _activeAgents.FirstOrDefault(e => e.AgentType == AgentType.Actor);
+            else
+                return null;
+        }
+
+        public void EmotionDecay()
+        {
+            foreach (Agent agent in _activeAgents)
+            {
+                foreach (Emotion em in agent.ActiveEmotions )
+                {
+                    em.Duration -= 1;
+                }
+                DetermineEmotionState(agent);
+            }
         }
     }
 }

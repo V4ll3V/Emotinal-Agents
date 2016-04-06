@@ -11,18 +11,54 @@ namespace Assets.Scripts.Agents
         public AgentManager AgentManager;
         public GameObject ObstacleContainer;
 
-        public Scrollbar JoyDispair;
-        public Scrollbar FearHope;
-        public Scrollbar ShamePride;
-        public Scrollbar DisappointmentRelief;
-        public Scrollbar AngerGratitude;
-        public Scrollbar ReporachAdmiration;
-        public Scrollbar LoveHate;
 
+        public Slider JoyDispair;
+        public Slider FearHope;
+        public Slider ShamePride;
+        public Slider DisappointmentRelief;
+        public Slider AngerGratitude;
+        public Slider ReporachAdmiration;
+        public Slider LoveHate;
+
+        public Slider Neuroticism;
+        public Slider Extraversion;
+        public Slider OpennessToExperience;
+        public Slider Conscientiousness;
+        public Slider Agreeableness;
 
         private int _enemyCount;
         private int _timerCount;
         private bool _showObstalces;
+
+        void Update()
+        {
+            Agent Actor = AgentManager.GetActorAgent();
+            float value;
+            if (Actor != null && Actor.ActiveEmotionPairs != null)
+            {
+                if (Actor.ActiveEmotionPairs.TryGetValue(ActiveEmotionPair.JoyDispair, out value))
+                    JoyDispair.value = value;
+                if (Actor.ActiveEmotionPairs.TryGetValue(ActiveEmotionPair.FearHope, out value))
+                    FearHope.value = value;
+                if (Actor.ActiveEmotionPairs.TryGetValue(ActiveEmotionPair.ShamePride, out value))
+                    ShamePride.value = value;
+                if (Actor.ActiveEmotionPairs.TryGetValue(ActiveEmotionPair.DisappointmentRelief, out value))
+                    DisappointmentRelief.value = value;
+                if (Actor.ActiveEmotionPairs.TryGetValue(ActiveEmotionPair.AngerGratitude, out value))
+                    AngerGratitude.value = value;
+                if (Actor.ActiveEmotionPairs.TryGetValue(ActiveEmotionPair.ReporachAdmiration, out value))
+                    ReporachAdmiration.value = value;
+                if (Actor.ActiveEmotionPairs.TryGetValue(ActiveEmotionPair.LoveHate, out value))
+                    LoveHate.value = value;
+            }
+            if (Actor != null)
+            {
+                ActorEmotionStateImage.sprite = Resources.Load<Sprite>("Sprites/EmotionType/" + Actor.EmotionState.ToString());
+                
+
+            }
+
+        }
 
         public void OnSetGoalReachFriendly()
         {
@@ -78,7 +114,9 @@ namespace Assets.Scripts.Agents
 
         public void OnCreateActor()
         {
-            AgentManager.CreateActor();
+            AgentPersonality personality = new AgentPersonality(Neuroticism.value, Extraversion.value, OpennessToExperience.value, Conscientiousness.value, Agreeableness.value);
+            AgentManager.CreateActor(personality);
         }
+        
     }
 }
